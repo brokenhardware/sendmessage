@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Send gossipsub message</title>
+  </head>
+  <body style="font-family: sans-serif;">
+	<div style="border:0px solid #000; padding:10px; margin:10px; font-size:20px; font-weight:bold">Send gossipsub message</div>
+	<div style="border:1px solid #000; padding:10px; margin:10px; background-color:#DDD">
+		<span style="font-weight:bold">Request CID:</span>
+		<span><input id="userCID" type="text" style="width:600px; padding:5px; font-size:18px" value="" /></span>
+		<span><button id="requestCID" style="font-size:20px; display:none">Send</button></span>
+	</div>
+	<div style="margin:10px;">
+		<span style="font-weight:bold">Image content:</span>
+		<div id="imageContainer" style="padding:10px; border:2px solid #CCC"></div>
+	</div>
+	<div style="border:1px solid #000; padding:10px; margin:10px; background-color:#FCC">
+		<span style="font-weight:bold">This node ID:</span>
+		<span id="thisNodeId"></span>
+	</div>
+	<div style="border:1px solid #000; padding:10px; margin:10px; background-color:#CFC">
+		<span style="font-weight:bold">Topic:</span>
+		<span id="topicName"></span>
+	</div>
+	<div style="border:1px solid #000; padding:10px; margin:10px; background-color:#CCF">
+		<div style="font-weight:bold">Topic subscribers:</div>
+		<div id="topicSubList"></div>
+	</div>
+	<div id="app"><ul id="myList"></ul></div>
+    <script src="https://cdn.jsdelivr.net/npm/webpeerjs@0.1/dist/umd/webpeerjs.min.js"></script>
+	<script>
+		void async function main() {
+			function write(input){
+				const node = document.createElement("li")
+				const textnode = document.createTextNode(input)
+				node.appendChild(textnode)
+				document.getElementById("myList").appendChild(node)
+			}
+
+			const node = await webpeerjs.createWebpeer()
+			
+			document.getElementById('thisNodeId').innerText = node.id
+			
+			let room = "globalroom";
+			const param = window.location.hash.substring(1);
+			if (param.length > 0) {room = param;}
+			
+			document.getElementById('topicName').innerText = room
+			
+			const [broadcast,listen,members] = node.joinRoom(room)
+			
+			listen((message,id) => {
+				//write(`Message from ${id} : ${message}`)
+			})
+			
+			members((data) => {
+				if (data.length < 2) {document.getElementById('requestCID').style.display = 'none';}
+				else {document.getElementById('requestCID').style.display = '';}
+				
+				document.getElementById('topicSubList').innerHTML = '';
+				data.forEach(function(data) {
+					document.getElementById('topicSubList').innerHTML += data + "<br/>";
+				});
+				
+				
+			})
+			
+			document.getElementById('requestCID').onclick = function() {
+				let userCID = document.getElementById('userCID').value
+				if (userCID.length > 0) {
+					console.log(userCID)
+					broadcast(userCID)
+					setTimeout(() => {
+						const parent = document.getElementById('imageContainer');
+						while (parent.firstChild) {
+							parent.removeChild(parent.firstChild);
+						}
+						const img = document.createElement('img');
+						img.src = 'https://ipfs.io/ipfs/' + userCID;
+						img.alt = 'sample image';
+						img.width = 600;
+						document.getElementById("imageContainer").appendChild(img);
+					}, 1000);
+				}
+			};
+		}()
+	</script>
+  </body>
+</html>

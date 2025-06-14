@@ -28,7 +28,12 @@
 		<div style="font-weight:bold">Topic subscribers:</div>
 		<div id="topicSubList"></div>
 	</div>
+	<div style="border:1px solid #000; padding:10px; margin:10px; background-color:#FFC">
+		<div style="font-weight:bold">Message:</div>
+		<div id="message"></div>
+	</div>
 	<div id="app"><ul id="myList"></ul></div>
+	  
     <script src="https://cdn.jsdelivr.net/npm/webpeerjs@0.1/dist/umd/webpeerjs.min.js"></script>
 	<script>
 		void async function main() {
@@ -53,6 +58,7 @@
 			
 			listen((message,id) => {
 				//write(`Message from ${id} : ${message}`)
+				document.getElementById('message').innerHTML = "Message from " + id ": " + message;
 			})
 			
 			members((data) => {

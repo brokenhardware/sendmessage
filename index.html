@@ -6,7 +6,10 @@
     <title>Send gossipsub message</title>
   </head>
   <body style="font-family: sans-serif;">
-	<div style="border:0px solid #000; padding:10px; margin:10px; font-size:20px; font-weight:bold">Send gossipsub message</div>
+	<div style="border:0px solid #000; padding:10px; margin:10px; font-size:20px; font-weight:bold;">
+		<div id="indicator" style="display:inline-block; background-color:red; height:30px; width:30px; margin-right:10px; border-radius:15px"></div>
+		<div style="display:inline; line-height:30px; vertical-align:top">Send gossipsub message</div>
+    </div>
 	<div style="border:1px solid #000; padding:10px; margin:10px; background-color:#DDD">
 		<span style="font-weight:bold">Request CID:</span>
 		<span><input id="userCID" type="text" style="width:600px; padding:5px; font-size:18px" value="" /></span>
@@ -62,17 +65,23 @@
 			})
 			
 			members((data) => {
-				if (data.length < 1) {document.getElementById('requestCID').style.display = 'none';}
-				else {document.getElementById('requestCID').style.display = '';}
-				
 				document.getElementById('topicSubList').innerHTML = '';
 				data.forEach(function(data) {
 					document.getElementById('topicSubList').innerHTML += data + "<br/>";
 				});
-				
-				
 			})
-			
+
+			setInterval(() => {
+				const status = node.status
+				if (status == 'connected') {
+					document.getElementById("indicator").style.backgroundColor = "green";
+					document.getElementById('requestCID').style.display = '';
+				} else {
+					document.getElementById("indicator").style.backgroundColor = "red";
+					document.getElementById('requestCID').style.display = 'none';
+				}
+			},500)
+
 			document.getElementById('requestCID').onclick = function() {
 				let userCID = document.getElementById('userCID').value
 				if (userCID.length > 0) {
